@@ -97,14 +97,13 @@
             margin-bottom: 2rem;
             position: relative;
             border: 1px solid rgba(255,255,255,0.1);
-            transform: translateX(100%) scale(0.9);
+            transform: translateY(20px);
             opacity: 0;
             transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
-            transform-origin: right center;
         }
         
         .editor-container.animate {
-            transform: translateX(0) scale(1);
+            transform: translateY(0);
             opacity: 1;
         }
         
@@ -383,6 +382,30 @@
             animation: fadeIn 0.8s ease-out;
         }
         
+        .text-reveal {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .text-reveal .original {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .text-reveal .hidden {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            color: var(--gold);
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+        
+        .text-reveal .hidden span {
+            display: inline-block;
+            transform-origin: center;
+        }
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -414,6 +437,11 @@
         @keyframes neonGlow {
             from { box-shadow: 0 0 5px var(--neon); }
             to { box-shadow: 0 0 15px var(--neon); }
+        }
+        
+        @keyframes explode {
+            0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) rotate(var(--r)); opacity: 0; }
         }
         
         .particles {
@@ -465,7 +493,7 @@
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://api-maps.yandex.ru/2.1/?apikey=ваш_api_ключ&lang=ru_RU" type="text/javascript"></script>
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=bf9555ad-35c0-414b-b465-86f148ed4809&lang=ru_RU" type="text/javascript"></script>
 </head>
 <body>
     <div class="particles" id="particles"></div>
@@ -505,7 +533,7 @@
                 </div>
                 <div class="code-line">
                     <span class="line-number">5</span>
-                    <span class="code">  <span class="variable">location</span><span class="punctuation">:</span> <span class="string">"Тульская обл., г.о. Тула, д. Дементеево"</span><span class="punctuation">,</span></span>
+                    <span class="code">  <span class="variable">location</span><span class="punctuation">:</span> <span class="string">"<span class="text-reveal"><span class="original">Секретная локация</span><span class="hidden">Тульская обл., г.о. Тула, д. Дементеево, территория Поле-1, 176</span></span>"</span><span class="punctuation">,</span></span>
                 </div>
                 <div class="code-line">
                     <span class="line-number">6</span>
@@ -521,7 +549,7 @@
                 </div>
                 <div class="code-line">
                     <span class="line-number">9</span>
-                    <span class="code">  <span class="variable">message</span><span class="punctuation">:</span> <span class="string">`Дорогие <span id="codeFamilyName">***</span>! Вы среди 3 избранных семей!`</span></span>
+                    <span class="code">  <span class="variable">message</span><span class="punctuation">:</span> <span class="string">`Дорогие <span id="codeFamilyName">***</span>! Вы среди <span id="secretCount">3</span> избранных семей!`</span></span>
                 </div>
                 <div class="code-line">
                     <span class="line-number">10</span>
@@ -588,7 +616,7 @@
                     <div class="detail-icon"><i class="fas fa-map-marked-alt"></i></div>
                     <div class="detail-text">
                         <h3>Место</h3>
-                        <p>Тульская обл., г.о. Тула<br>д. Дементеево</p>
+                        <p class="text-reveal"><span class="original">Секретная локация</span><span class="hidden">Тульская обл., г.о. Тула, д. Дементеево, территория Поле-1, 176</span></p>
                     </div>
                 </div>
                 <div class="detail-item">
@@ -619,6 +647,13 @@
     </div>
     
     <script>
+        // Конфигурация
+        const CONFIG = {
+            secretCount: 3, // Количество избранных семей
+            realAddress: "Тульская обл., г.о. Тула, д. Дементеево, территория Поле-1, 176",
+            secretAddress: "Секретная локация"
+        };
+        
         // Список семей с кодами доступа
         const families = {
             'kotovy': 'Котовы (почти Котовы)',
@@ -626,21 +661,38 @@
             'gromovy': 'Громовы'
         };
         
-        // Парсим URL параметры
-        const urlParams = new URLSearchParams(window.location.search);
-        const familyCode = urlParams.get('family') || window.location.hash.substring(1);
-        
-        // Устанавливаем имя семьи или звездочки
-        const familyNameElement = document.getElementById('familyName');
-        const codeFamilyNameElement = document.getElementById('codeFamilyName');
-        
-        if (familyCode && families[familyCode]) {
-            familyNameElement.textContent = families[familyCode];
-            codeFamilyNameElement.textContent = families[familyCode];
-        } else {
-            familyNameElement.textContent = '***';
-            codeFamilyNameElement.textContent = '***';
-        }
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            // Установка количества избранных семей
+            document.getElementById('secretCount').textContent = CONFIG.secretCount;
+            
+            // Парсим URL параметры
+            const urlParams = new URLSearchParams(window.location.search);
+            const familyCode = urlParams.get('family') || window.location.hash.substring(1);
+            
+            // Устанавливаем имя семьи или звездочки
+            const familyNameElement = document.getElementById('familyName');
+            const codeFamilyNameElement = document.getElementById('codeFamilyName');
+            
+            if (familyCode && families[familyCode]) {
+                familyNameElement.textContent = families[familyCode];
+                codeFamilyNameElement.textContent = families[familyCode];
+            } else {
+                familyNameElement.textContent = '***';
+                codeFamilyNameElement.textContent = '***';
+            }
+            
+            // Создаем плавающие элементы
+            createFloatingElements();
+            createParticles();
+            animateCursor();
+            setupConfirmation();
+            
+            // Анимация редактора через 1 секунду
+            setTimeout(() => {
+                document.querySelector('.editor-container').classList.add('animate');
+            }, 1000);
+        });
         
         // Создаем плавающие элементы
         function createFloatingElements() {
@@ -692,7 +744,7 @@
             const mapContainer = document.getElementById('mapContainer');
             
             // Координаты для "Тульская обл., г.о. Тула, д. Дементеево, территория Поле-1, 176"
-            const coordinates = [54.138338, 37.459972]; // Примерные координаты
+            const coordinates = [54.101563, 37.625385]; // Примерные координаты
             
             ymaps.ready(function() {
                 const map = new ymaps.Map(mapContainer, {
@@ -704,7 +756,7 @@
                 // Добавляем метку
                 const placemark = new ymaps.Placemark(coordinates, {
                     hintContent: 'Место проведения праздника',
-                    balloonContent: 'Тульская обл., г.о. Тула, д. Дементеево, территория Поле-1, 176'
+                    balloonContent: CONFIG.realAddress
                 }, {
                     iconLayout: 'default#image',
                     iconImageHref: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
@@ -717,6 +769,70 @@
                 // Добавляем элементы управления
                 map.controls.add('zoomControl');
                 map.controls.add('geolocationControl');
+            });
+        }
+        
+        // Эффект рассыпания текста
+        function explodeText(element) {
+            const text = element.textContent;
+            element.innerHTML = '';
+            
+            for (let i = 0; i < text.length; i++) {
+                const char = document.createElement('span');
+                char.textContent = text[i];
+                char.style.display = 'inline-block';
+                char.style.transformOrigin = 'center';
+                
+                // Случайные параметры анимации
+                const angle = Math.random() * 360;
+                const distance = 10 + Math.random() * 40;
+                const x = Math.cos(angle * Math.PI / 180) * distance;
+                const y = Math.sin(angle * Math.PI / 180) * distance;
+                
+                char.style.setProperty('--tx', `${x}px`);
+                char.style.setProperty('--ty', `${y}px`);
+                char.style.setProperty('--r', `${angle}deg`);
+                char.style.animation = `explode ${0.5 + Math.random() * 0.5}s forwards`;
+                
+                element.appendChild(char);
+            }
+        }
+        
+        // Раскрытие секретного адреса
+        function revealSecretAddress() {
+            const textReveals = document.querySelectorAll('.text-reveal');
+            
+            textReveals.forEach(reveal => {
+                const original = reveal.querySelector('.original');
+                const hidden = reveal.querySelector('.hidden');
+                
+                // Анимация рассыпания оригинального текста
+                explodeText(original);
+                
+                // Показываем скрытый текст с анимацией
+                setTimeout(() => {
+                    hidden.style.clipPath = 'polygon(0 0, 100% 0, 100% 100%, 0 100%)';
+                    hidden.style.transition = 'clip-path 1s ease-out';
+                    
+                    // Анимация появления символов по одному
+                    const chars = hidden.textContent.split('');
+                    hidden.innerHTML = '';
+                    
+                    chars.forEach((char, index) => {
+                        const span = document.createElement('span');
+                        span.textContent = char;
+                        span.style.opacity = '0';
+                        span.style.display = 'inline-block';
+                        span.style.transform = 'translateY(10px)';
+                        hidden.appendChild(span);
+                        
+                        setTimeout(() => {
+                            span.style.opacity = '1';
+                            span.style.transform = 'translateY(0)';
+                            span.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                        }, index * 50);
+                    });
+                }, 500);
             });
         }
         
@@ -741,6 +857,9 @@
                     // Изменение состояния кнопки
                     buttonText.textContent = 'До встречи!';
                     buttonIcon.style.display = 'inline-block';
+                    
+                    // Раскрываем секретный адрес
+                    revealSecretAddress();
                     
                     // Показываем карту
                     mapContainer.style.display = 'block';
@@ -777,48 +896,6 @@
                 }, 5000);
             }
         }
-        
-        // Добавляем стили для конфетти
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes confettiFall {
-                0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
-                100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
-        
-        // Инициализация
-        document.addEventListener('DOMContentLoaded', function() {
-            createFloatingElements();
-            createParticles();
-            animateCursor();
-            setupConfirmation();
-            
-            // Анимация редактора при скролле
-            const editor = document.querySelector('.editor-container');
-            let isAnimated = false;
-            
-            function checkScroll() {
-                if (isAnimated) return;
-                
-                const editorPosition = editor.getBoundingClientRect().top;
-                const screenPosition = window.innerHeight / 1.3;
-                
-                if (editorPosition < screenPosition) {
-                    editor.classList.add('animate');
-                    isAnimated = true;
-                    window.removeEventListener('scroll', checkScroll);
-                }
-            }
-            
-            // Запускаем только после начала скролла
-            let scrollTimeout;
-            window.addEventListener('scroll', function() {
-                clearTimeout(scrollTimeout);
-                scrollTimeout = setTimeout(checkScroll, 100);
-            });
-        });
     </script>
 </body>
 </html>
