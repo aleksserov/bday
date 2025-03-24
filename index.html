@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Secret Invitation</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --secondary: #64748b;
+            --accent: #f43f5e;
+            --light: #f8fafc;
+            --dark: #020617;
+            --code-bg: #0f172a;
+            --gold: #eab308;
+            --editor-bg: #1e293b;
+            --neon: #06b6d4;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Fira Code', monospace, -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: var(--dark);
+            color: var(--light);
+            overflow-x: hidden;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(244, 63, 94, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(14, 165, 233, 0.15) 0%, transparent 50%);
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        /* Анимированный заголовок */
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            animation: fadeIn 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.8rem;
+            background: linear-gradient(90deg, var(--gold), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+            display: inline-block;
+            line-height: 1.2;
+            text-shadow: 0 0 10px rgba(244, 63, 94, 0.3);
+        }
+        
+        .header h1::after {
+            content: '30!';
+            position: absolute;
+            right: -1.8rem;
+            top: -0.8rem;
+            font-size: 1.2rem;
+            color: var(--gold);
+            animation: pulse 1.5s infinite, rotate 6s infinite linear;
+            filter: drop-shadow(0 0 5px rgba(234, 179, 8, 0.7));
+        }
+        
+        .header p {
+            font-size: 1rem;
+            color: var(--secondary);
+            line-height: 1.4;
+            animation: fadeIn 1s ease-out 0.3s both;
+        }
+        
+        .secret-code {
+            background: rgba(234, 179, 8, 0.15);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-family: monospace;
+            color: var(--gold);
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px rgba(234, 179, 8, 0.5);
+            animation: glitch 2s infinite alternate;
+        }
+        
+        /* Стили для редактора кода с синтаксической подсветкой */
+        .editor-container {
+            background-color: var(--editor-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            margin-bottom: 2rem;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.1);
+            transform: perspective(1000px) rotateX(5deg);
+            transition: transform 0.5s ease;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .editor-container:hover {
+            transform: perspective(1000px) rotateX(0deg) translateY(-5px);
+        }
+        
+        .editor-header {
+            background: linear-gradient(to right, #1e293b, #334155);
+            padding: 0.7rem 1rem;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.9rem;
+        }
+        
+        .editor-buttons {
+            display: flex;
+            gap: 8px;
+            margin-right: 15px;
+        }
+        
+        .editor-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            box-shadow: 0 0 2px rgba(0,0,0,0.3);
+        }
+        
+        .editor-button.red { background-color: #ff5f56; }
+        .editor-button.yellow { background-color: #ffbd2e; }
+        .editor-button.green { background-color: #27c93f; }
+        
+        .editor-title {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            flex-grow: 1;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        
+        .editor-content {
+            padding: 1.2rem 1rem;
+            position: relative;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            background-color: var(--code-bg);
+            background-image: 
+                linear-gradient(rgba(14, 165, 233, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(14, 165, 233, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        .code-line {
+            display: flex;
+            margin-bottom: 0.5rem;
+            align-items: flex-start;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .code-line:hover {
+            background: rgba(255,255,255,0.03);
+        }
+        
+        .line-number {
+            color: #64748b;
+            margin-right: 1rem;
+            width: 25px;
+            text-align: right;
+            user-select: none;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+        
+        .code {
+            color: #e2e8f0;
+            flex-grow: 1;
+            font-family: 'Fira Code', monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        /* Синтаксическая подсветка */
+        .comment { color: #64748b; font-style: italic; }
+        .string { color: #86efac; }
+        .keyword { color: #c084fc; }
+        .function { color: #60a5fa; }
+        .variable { color: #fca5a5; }
+        .number { color: #f59e0b; }
+        .operator { color: #67e8f9; }
+        .punctuation { color: #cbd5e1; }
+        .constant { color: #f59e0b; }
+        .import { color: #a5b4fc; }
+        .bracket { color: #67e8f9; }
+        
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background-color: var(--neon);
+            vertical-align: middle;
+            margin-left: 2px;
+            animation: blink 1s infinite, neonGlow 1.5s infinite alternate;
+        }
+        
+        /* Блок с деталями */
+        .details {
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--accent);
+            animation: fadeIn 1s ease-out 0.3s both;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .details::before {
+            content: '30';
+            position: absolute;
+            font-size: 15rem;
+            font-weight: bold;
+            color: rgba(234, 179, 8, 0.03);
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 0;
+        }
+        
+        .details h2 {
+            color: var(--accent);
+            margin-bottom: 1.2rem;
+            font-size: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .details h2::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), transparent);
+        }
+        
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.2rem;
+            position: relative;
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.3s ease;
+        }
+        
+        .detail-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .detail-icon {
+            font-size: 1.3rem;
+            color: var(--gold);
+            flex-shrink: 0;
+            margin-top: 2px;
+            text-shadow: 0 0 5px rgba(234, 179, 8, 0.3);
+        }
+        
+        .detail-text h3 {
+            color: var(--light);
+            margin-bottom: 0.3rem;
+            font-size: 1rem;
+        }
+        
+        .detail-text p {
+            color: var(--secondary);
+            line-height: 1.4;
+            font-size: 0.9rem;
+        }
+        
+        /* Кнопка подтверждения */
+        .cta {
+            text-align: center;
+            margin-top: 2rem;
+            position: relative;
+        }
+        
+        .cta-button {
+            background: linear-gradient(45deg, var(--accent), #f87171);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(244, 63, 94, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+            z-index: 1;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(244, 63, 94, 0.6);
+        }
+        
+        .cta-button:active {
+            transform: translateY(1px);
+        }
+        
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+        
+        .cta-button:hover::before {
+            left: 100%;
+        }
+        
+        /* Плавающие элементы */
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .floating-element {
+            position: absolute;
+            color: rgba(148, 163, 184, 0.15);
+            font-size: 1.5rem;
+            animation: float 15s linear infinite;
+            user-select: none;
+        }
+        
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(100vh) translateX(0) rotate(0deg); }
+            100% { transform: translateY(-100px) translateX(100px) rotate(360deg); }
+        }
+        
+        @keyframes glitch {
+            0% { text-shadow: 0 0 5px var(--gold); }
+            25% { text-shadow: -2px 0 3px #f43f5e, 2px 0 3px #0ea5e9; }
+            50% { text-shadow: 0 0 5px var(--gold); }
+            75% { text-shadow: -3px 0 4px #0ea5e9, 3px 0 4px #f43f5e; }
+            100% { text-shadow: 0 0 5px var(--gold); }
+        }
+        
+        @keyframes neonGlow {
+            from { box-shadow: 0 0 5px var(--neon); }
+            to { box-shadow: 0 0 15px var(--neon); }
+        }
+        
+        @keyframes floatEditor {
+            0%, 100% { transform: perspective(1000px) rotateX(5deg) translateY(0); }
+            50% { transform: perspective(1000px) rotateX(5deg) translateY(-10px); }
+        }
+        
+        /* Эффект частиц */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            background: var(--gold);
+            border-radius: 50%;
+            animation: float 15s linear infinite;
+            opacity: 0.3;
+            filter: blur(1px);
+        }
+        
+        /* Адаптация для десктопов */
+        @media (min-width: 768px) {
+            .container {
+                padding: 2rem;
+                max-width: 600px;
+            }
+            
+            .header h1 {
+                font-size: 2.8rem;
+            }
+            
+            .details-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .editor-content {
+                font-size: 1rem;
+                padding: 1.5rem;
+            }
+            
+            .code-line {
+                margin-bottom: 0.7rem;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    <div class="floating-elements" id="floatingElements"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>Secret Invitation</h1>
+            <p>Только для <span class="secret-code" id="familyName">***</span></p>
+        </div>
+        
+        <div class="editor-container">
+            <div class="editor-header">
+                <div class="editor-buttons">
+                    <div class="editor-button red"></div>
+                    <div class="editor-button yellow"></div>
+                    <div class="editor-button green"></div>
+                </div>
+                <div class="editor-title">invite.js</div>
+            </div>
+            <div class="editor-content">
+                <div class="code-line">
+                    <span class="line-number">1</span>
+                    <span class="code"><span class="keyword">const</span> <span class="variable">secretParty</span> <span class="operator">=</span> <span class="punctuation">{</span></span>
+                </div>
+                <div class="code-line">
+                    <span class="line-number">2</span>
+                    <span class="code">  <span class="variable">celebrator</span><span class="punctuation">:</span> <span class="string">"Team Lead Веб-разработки"</span><span class="punctuation">,</span></span>
+                </div>
+                <div class="code-line">
+                    <span class="line-number">3</span>
+                    <span class="code">  <span class="variable">milestone</span><span class="punctuation">:</span> <span class="number">30</span><span class="punctuation">,</span> <span class="comment">// Время подводить итоги!</span></span>
+                </div>
+                <div class="code-line">
+                    <span class="line-number">4</span>
+                    <span class="code">  <span class="variable">date</span><span class="punctuation">:</span> <span class="string">"2025-04-05T16:00"</span><span class="punctuation">,</span></span>
+                </div>
+                <div class="code-line">
+                    <span class="line-number">5</span>
+                    <span class="code">  <span class="variable">location</span><span class="punctuation">:</span> <span class="string">"Секретное место"</span><span class="punctuation">,</span></span>
+                </div>
+                <div class="code-line">
+                    <span class="line-number">6</span>
+                    <span class="code">  <span class="variable">dressCode</span><span class="punctuation">:</span> <span class="string">"Smart Casual"</span><span class="punctuation">,</span></span>
+                </div>
+                <div class="code-line">
+                    <span class="line-number">7</span>
+                    <span class="code">  <span class="variable">specialGuests</span><span class="punctuation">:</span> <span class="string">"Избранные"</span><span class="punctuation">,</span></span>
+                </div>
+                <div class="code-line">
+                    <span class="line-number">8</span>
+                    <span class="code">  <span class="variable">accessLevel</span><span class="punctuation">:</span> <span class="string">"Top Secret"</span><span class="punctuation">,</span></span>
+                </div>
+                <div class="code-line">
+                    <span class="line-number">9</span>
+                    <span class="code">  <span class="variable">message</span><span class="punctuation">:</span> <span class="string">`Дорогие <span id="codeFamilyName">***</span>! Вы среди 3 избранных семей!`</span></span>
+                </div>
+                <div class="code-line">
+                    <span class="line-number">10</span>
+                    <span class="code"><span class="punctuation">}</span><span class="punctuation">;</span></span>
+                </div>
+                <div class="code-line">
+                    <span class="line-number">11</span>
+                    <span class="code"></span>
+                </div>
+                <div class="code-line">
+                    <span class="line-number">12</span>
+                    <span class="code"><span class="comment">// Программа мероприятия:</span></span>
+                </div>
+                <div class="code-line">
+                    <span class="line-number">13</span>
+                    <span class="code"><span class="keyword">const</span> <span class="variable">program</span> <span class="operator">=</span> <span class="punctuation">[</span></span>
+                </div>
+                <div class="code-line">
+                    <span class="line-number">14</span>
+                    <span class="code">  <span class="string">"16:00 - Тайный вход (пароль: '30 лет')"</span><span class="punctuation">,</span></span>
+                </div>
+                <div class="code-line">
+                    <span class="line-number">15</span>
+                    <span class="code">  <span class="string">"17:00 - Взлом торта (30 свечей = 30 багов)"</span><span class="punctuation">,</span></span>
+                </div>
+                <div class="code-line">
+                    <span class="line-number">16</span>
+                    <span class="code">  <span class="string">"18:00 - Алкогольный код-ревью"</span><span class="punctuation">,</span></span>
+                </div>
+                <div class="code-line">
+                    <span class="line-number">17</span>
+                    <span class="code">  <span class="string">"20:00 - Танцы до деплоя в прод"</span></span>
+                </div>
+                <div class="code-line">
+                    <span class="line-number">18</span>
+                    <span class="code"><span class="punctuation">]</span><span class="punctuation">;</span></span>
+                </div>
+                <div class="code-line">
+                    <span class="line-number">19</span>
+                    <span class="code"></span>
+                </div>
+                <div class="code-line">
+                    <span class="line-number">20</span>
+                    <span class="code"><span class="comment">// Подтверждение участия:</span></span>
+                </div>
+                <div class="code-line">
+                    <span class="line-number">21</span>
+                    <span class="code"><span class="keyword">await</span> <span class="function">confirmAttendance</span><span class="punctuation">(</span><span class="punctuation">)</span><span class="punctuation">;</span> <span class="comment">// Жми кнопку ниже <span class="cursor"></span></span></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="details">
+            <h2>Детали мероприятия</h2>
+            <div class="details-grid">
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-calendar-alt"></i></div>
+                    <div class="detail-text">
+                        <h3>Дата и время</h3>
+                        <p>5 апреля 2025<br>16:00 - до последнего гостя</p>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-map-marked-alt"></i></div>
+                    <div class="detail-text">
+                        <h3>Место</h3>
+                        <p>Секретная локация<br>(будет раскрыта позже)</p>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-user-secret"></i></div>
+                    <div class="detail-text">
+                        <h3>Дресс-код</h3>
+                        <p>Smart Casual<br>+ маска анонимности</p>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-gift"></i></div>
+                    <div class="detail-text">
+                        <h3>Подарки</h3>
+                        <p>Только если очень хочется<br>(мечтаю о механической клавиатуре)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="cta">
+            <button class="cta-button" id="confirmButton">
+                <span id="buttonText">Подтвердить участие</span>
+                <span id="buttonIcon" style="margin-left: 8px; display: none;"><i class="fas fa-check"></i></span>
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        // Список семей с кодами доступа
+        const families = {
+            'kotovy': 'Котовы (почти Котовы)',
+            'filippovy': 'Филипповы',
+            'gromovy': 'Громовы'
+        };
+        
+        // Парсим URL параметры
+        const urlParams = new URLSearchParams(window.location.search);
+        const familyCode = urlParams.get('family') || window.location.hash.substring(1);
+        
+        // Устанавливаем имя семьи или звездочки
+        const familyNameElement = document.getElementById('familyName');
+        const codeFamilyNameElement = document.getElementById('codeFamilyName');
+        
+        if (familyCode && families[familyCode]) {
+            familyNameElement.textContent = families[familyCode];
+            codeFamilyNameElement.textContent = families[familyCode];
+        } else {
+            familyNameElement.textContent = '***';
+            codeFamilyNameElement.textContent = '***';
+        }
+        
+        // Создаем плавающие элементы
+        function createFloatingElements() {
+            const container = document.getElementById('floatingElements');
+            const symbols = ['{ }', '<>', '</>', '[]', '()', '/*', '*/', '=>', '==', '===', '!=', '!==', '++', '--', '&&', '||', '??', '?.', '#', '*', '/'];
+            
+            for (let i = 0; i < 15; i++) {
+                const element = document.createElement('div');
+                element.className = 'floating-element';
+                element.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                element.style.left = Math.random() * 100 + 'vw';
+                element.style.top = Math.random() * 100 + 'vh';
+                element.style.fontSize = (0.5 + Math.random() * 2) + 'rem';
+                element.style.animationDuration = (10 + Math.random() * 20) + 's';
+                element.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(element);
+            }
+        }
+        
+        // Создаем частицы
+        function createParticles() {
+            const container = document.getElementById('particles');
+            
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.top = Math.random() * 100 + 'vh';
+                particle.style.width = (2 + Math.random() * 3) + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.animationDuration = (10 + Math.random() * 20) + 's';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(particle);
+            }
+        }
+        
+        // Анимация курсора
+        function animateCursor() {
+            const cursor = document.querySelector('.cursor');
+            if (cursor) {
+                setInterval(() => {
+                    cursor.style.visibility = (cursor.style.visibility === 'hidden' ? 'visible' : 'hidden');
+                }, 600);
+            }
+        }
+        
+        // Обработка подтверждения
+        function setupConfirmation() {
+            const button = document.getElementById('confirmButton');
+            const buttonText = document.getElementById('buttonText');
+            const buttonIcon = document.getElementById('buttonIcon');
+            
+            if (button) {
+                button.addEventListener('click', function() {
+                    // Анимация нажатия
+                    this.style.transform = 'scale(0.95)';
+                    
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1) translateY(-3px)';
+                        this.style.boxShadow = '0 8px 25px rgba(244, 63, 94, 0.6)';
+                    }, 200);
+                    
+                    // Изменение состояния кнопки
+                    buttonText.textContent = 'До встречи!';
+                    buttonIcon.style.display = 'inline-block';
+                    
+                    // Создаем эффект конфетти
+                    createConfetti();
+                });
+            }
+        }
+        
+        // Эффект конфетти
+        function createConfetti() {
+            const colors = ['#f43f5e', '#0ea5e9', '#eab308', '#84cc16', '#a855f7'];
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.style.position = 'fixed';
+                confetti.style.width = (5 + Math.random() * 5) + 'px';
+                confetti.style.height = (5 + Math.random() * 5) + 'px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-10px';
+                confetti.style.borderRadius = '50%';
+                confetti.style.zIndex = '1000';
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                confetti.style.animation = `confettiFall ${2 + Math.random() * 3}s linear forwards`;
+                
+                document.body.appendChild(confetti);
+                
+                // Удаляем конфетти после анимации
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+        }
+        
+        // Добавляем стили для конфетти
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes confettiFall {
+                0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+                100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            createFloatingElements();
+            createParticles();
+            animateCursor();
+            setupConfirmation();
+            
+            // Анимация редактора кода
+            const editor = document.querySelector('.editor-container');
+            if (editor) {
+                setInterval(() => {
+                    editor.style.transform = `perspective(1000px) rotateX(5deg) translateY(${Math.sin(Date.now() / 1000) * 5}px)`;
+                }, 100);
+            }
+        });
+    </script>
+</body>
+</html>
