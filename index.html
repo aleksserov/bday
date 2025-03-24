@@ -15,6 +15,7 @@
             --gold: #eab308;
             --editor-bg: #1e293b;
             --neon: #06b6d4;
+            --success: #22c55e; /* Новый цвет для успешного подтверждения */
         }
         
         * {
@@ -73,15 +74,14 @@
             top: -0.8rem;
             font-size: 1.2rem;
             color: var(--gold);
-            animation: pulse 1.5s infinite, rotate 6s infinite linear;
+            animation: pulse 1.5s infinite ease-in-out;
             filter: drop-shadow(0 0 5px rgba(234, 179, 8, 0.7));
+            transform-origin: center;
         }
         
-        .header p {
-            font-size: 1rem;
-            color: var(--secondary);
-            line-height: 1.4;
-            animation: fadeIn 1s ease-out 0.3s both;
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.8; }
         }
         
         .secret-code {
@@ -104,13 +104,15 @@
             margin-bottom: 2rem;
             position: relative;
             border: 1px solid rgba(255,255,255,0.1);
-            transform: perspective(1000px) rotateX(5deg);
-            transition: transform 0.5s ease;
-            animation: float 6s ease-in-out infinite;
+            transform: translateX(100%) scale(0.9);
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+            transform-origin: right center;
         }
         
-        .editor-container:hover {
-            transform: perspective(1000px) rotateX(0deg) translateY(-5px);
+        .editor-container.animate {
+            transform: translateX(0) scale(1);
+            opacity: 1;
         }
         
         .editor-header {
@@ -327,9 +329,18 @@
             border: 1px solid rgba(255,255,255,0.1);
         }
         
+        .cta-button.confirmed {
+            background: linear-gradient(45deg, var(--success), #4ade80);
+            box-shadow: 0 5px 15px rgba(34, 197, 94, 0.4);
+        }
+        
         .cta-button:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(244, 63, 94, 0.6);
+        }
+        
+        .cta-button.confirmed:hover {
+            box-shadow: 0 8px 25px rgba(34, 197, 94, 0.6);
         }
         
         .cta-button:active {
@@ -378,16 +389,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-        }
-        
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
         @keyframes blink {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
@@ -409,11 +410,6 @@
         @keyframes neonGlow {
             from { box-shadow: 0 0 5px var(--neon); }
             to { box-shadow: 0 0 15px var(--neon); }
-        }
-        
-        @keyframes floatEditor {
-            0%, 100% { transform: perspective(1000px) rotateX(5deg) translateY(0); }
-            50% { transform: perspective(1000px) rotateX(5deg) translateY(-10px); }
         }
         
         /* Эффект частиц */
@@ -691,11 +687,12 @@
             if (button) {
                 button.addEventListener('click', function() {
                     // Анимация нажатия
+                    this.classList.add('confirmed');
                     this.style.transform = 'scale(0.95)';
                     
                     setTimeout(() => {
                         this.style.transform = 'scale(1) translateY(-3px)';
-                        this.style.boxShadow = '0 8px 25px rgba(244, 63, 94, 0.6)';
+                        this.style.boxShadow = '0 8px 25px rgba(34, 197, 94, 0.6)';
                     }, 200);
                     
                     // Изменение состояния кнопки
@@ -710,7 +707,7 @@
         
         // Эффект конфетти
         function createConfetti() {
-            const colors = ['#f43f5e', '#0ea5e9', '#eab308', '#84cc16', '#a855f7'];
+            const colors = ['#22c55e', '#0ea5e9', '#eab308', '#84cc16', '#a855f7'];
             
             for (let i = 0; i < 50; i++) {
                 const confetti = document.createElement('div');
@@ -751,13 +748,22 @@
             animateCursor();
             setupConfirmation();
             
-            // Анимация редактора кода
+            // Анимация редактора при прокрутке
             const editor = document.querySelector('.editor-container');
-            if (editor) {
-                setInterval(() => {
-                    editor.style.transform = `perspective(1000px) rotateX(5deg) translateY(${Math.sin(Date.now() / 1000) * 5}px)`;
-                }, 100);
+            
+            function checkScroll() {
+                const editorPosition = editor.getBoundingClientRect().top;
+                const screenPosition = window.innerHeight / 1.3;
+                
+                if (editorPosition < screenPosition) {
+                    editor.classList.add('animate');
+                    window.removeEventListener('scroll', checkScroll);
+                }
             }
+            
+            window.addEventListener('scroll', checkScroll);
+            // Запускаем сразу на случай если страница уже прокручена
+            checkScroll();
         });
     </script>
 </body>
