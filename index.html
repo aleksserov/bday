@@ -888,6 +888,7 @@
             
             if (button) {
                 button.addEventListener('click', function() {
+                    ym(100567549, 'reachGoal', 'btn_click', { title: 'Button Click', href: window.location.href });
                     // Анимация нажатия
                     this.classList.add('confirmed');
                     this.style.transform = 'scale(0.95)';
