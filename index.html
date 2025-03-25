@@ -69,7 +69,7 @@
         .header h1::after {
             content: '30!';
             position: absolute;
-            right: -1.8rem;
+            right: -2.5rem;
             top: -0.8rem;
             font-size: 1.2rem;
             color: var(--gold);
@@ -145,7 +145,7 @@
             padding: 1.2rem 1rem;
             position: relative;
             font-size: 0.9rem;
-            line-height: 1.6;
+            line-height: 1.8;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             background-color: var(--code-bg);
@@ -153,11 +153,12 @@
                 linear-gradient(rgba(14, 165, 233, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(14, 165, 233, 0.03) 1px, transparent 1px);
             background-size: 20px 20px;
+            overflow-wrap: break-word;
         }
         
         .code-line {
             display: flex;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.8rem;
             align-items: flex-start;
             position: relative;
             transition: all 0.3s ease;
@@ -220,18 +221,6 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
         
-        .details::before {
-            content: '30';
-            position: absolute;
-            font-size: 15rem;
-            font-weight: bold;
-            color: rgba(234, 179, 8, 0.03);
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 0;
-        }
-        
         .details h2 {
             color: var(--accent);
             margin-bottom: 1.2rem;
@@ -288,6 +277,80 @@
             color: var(--secondary);
             line-height: 1.4;
             font-size: 0.9rem;
+            white-space: pre-wrap;
+        }
+
+        .text-reveal-container {
+            position: relative;
+            min-height: 1em;
+            transition: min-height 0.5s ease-out;
+        }
+
+        .text-reveal {
+            position: relative;
+            display: inline-block;
+        }
+
+        .text-reveal .original {
+            position: relative;
+            z-index: 1;
+            display: inline-block;
+        }
+
+        .text-reveal .hidden {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            color: var(--gold);
+            clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: 
+                clip-path 0.8s ease-out,
+                opacity 0.5s ease-out,
+                transform 0.5s ease-out;
+            white-space: pre-wrap;
+            word-break: break-word;
+            background-color: var(--editor-bg);
+            padding-right: 0.5rem;
+        }
+
+        .text-reveal.revealed .hidden {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .text-reveal.revealed .original {
+            visibility: hidden;
+        }
+
+        .text-reveal .hidden span {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: 
+                opacity 0.3s ease,
+                transform 0.3s ease;
+        }
+
+        .text-reveal.revealed .hidden span {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .coordinates-blur {
+            filter: blur(5px);
+            transition: filter 0.8s ease-out;
+        }
+
+        .coordinates-blur.revealed {
+            filter: blur(0);
+        }
+        
+        .strikethrough-part {
+            text-decoration: line-through;
         }
         
         .cta {
@@ -382,30 +445,6 @@
             animation: fadeIn 0.8s ease-out;
         }
         
-        .text-reveal {
-            position: relative;
-            display: inline-block;
-        }
-        
-        .text-reveal .original {
-            position: relative;
-            z-index: 1;
-        }
-        
-        .text-reveal .hidden {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 2;
-            color: var(--gold);
-            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-        }
-        
-        .text-reveal .hidden span {
-            display: inline-block;
-            transform-origin: center;
-        }
-        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -494,6 +533,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://api-maps.yandex.ru/2.1/?apikey=bf9555ad-35c0-414b-b465-86f148ed4809&lang=ru_RU" type="text/javascript"></script>
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript" >
+       (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+   m[i].l=1*new Date();
+   for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+   k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+   (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+        ym(100567549, "init", {
+            clickmap:true,
+            trackLinks:true,
+            accurateTrackBounce:true,
+            webvisor:true
+        });
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/100567549" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
 </head>
 <body>
     <div class="particles" id="particles"></div>
@@ -521,7 +577,7 @@
                 </div>
                 <div class="code-line">
                     <span class="line-number">2</span>
-                    <span class="code">  <span class="variable">celebrator</span><span class="punctuation">:</span> <span class="string">"Team Lead Веб-разработки"</span><span class="punctuation">,</span></span>
+                    <span class="code">  <span class="variable">celebrator</span><span class="punctuation">:</span> <span class="string">"Ваш Алексей Серов"</span><span class="punctuation">,</span></span>
                 </div>
                 <div class="code-line">
                     <span class="line-number">3</span>
@@ -537,7 +593,7 @@
                 </div>
                 <div class="code-line">
                     <span class="line-number">6</span>
-                    <span class="code">  <span class="variable">dressCode</span><span class="punctuation">:</span> <span class="string">"Smart Casual"</span><span class="punctuation">,</span></span>
+                    <span class="code">  <span class="variable">dressCode</span><span class="punctuation">:</span> <span class="string">"Халат и тапочки + маска анонимности"</span><span class="punctuation">,</span></span>
                 </div>
                 <div class="code-line">
                     <span class="line-number">7</span>
@@ -549,7 +605,7 @@
                 </div>
                 <div class="code-line">
                     <span class="line-number">9</span>
-                    <span class="code">  <span class="variable">message</span><span class="punctuation">:</span> <span class="string">`Дорогие <span id="codeFamilyName">***</span>! Вы среди <span id="secretCount">3</span> избранных семей!`</span></span>
+                    <span class="code">  <span class="variable">message</span><span class="punctuation">:</span> <span class="string">"Дорогие <span id="codeFamilyName">***</span>! Вы среди ${secretCount} избранных семей!"</span></span>
                 </div>
                 <div class="code-line">
                     <span class="line-number">10</span>
@@ -573,7 +629,7 @@
                 </div>
                 <div class="code-line">
                     <span class="line-number">15</span>
-                    <span class="code">  <span class="string">"17:00 - Взлом торта (30 свечей = 30 багов)"</span><span class="punctuation">,</span></span>
+                    <span class="code">  <span class="string">"17:00 - Тортфикс (30 свечей = 30 багов)"</span><span class="punctuation">,</span></span>
                 </div>
                 <div class="code-line">
                     <span class="line-number">16</span>
@@ -581,22 +637,26 @@
                 </div>
                 <div class="code-line">
                     <span class="line-number">17</span>
-                    <span class="code">  <span class="string">"20:00 - Танцы до деплоя в прод"</span></span>
+                    <span class="code">  <span class="string">"20:00 - Танцы до деплоя в прод"</span><span class="punctuation">,</span></span>
                 </div>
                 <div class="code-line">
                     <span class="line-number">18</span>
-                    <span class="code"><span class="punctuation">]</span><span class="punctuation">;</span></span>
+                    <span class="code">  <span class="string">"21:00 - hot<span class="strikethrough-part">dogs</span>fixes в купальниках и плавках (не шутка)"</span></span>
                 </div>
                 <div class="code-line">
                     <span class="line-number">19</span>
-                    <span class="code"></span>
+                    <span class="code"><span class="punctuation">]</span><span class="punctuation">;</span></span>
                 </div>
                 <div class="code-line">
                     <span class="line-number">20</span>
-                    <span class="code"><span class="comment">// Подтверждение участия:</span></span>
+                    <span class="code"></span>
                 </div>
                 <div class="code-line">
                     <span class="line-number">21</span>
+                    <span class="code"><span class="comment">// Подтверждение участия:</span></span>
+                </div>
+                <div class="code-line">
+                    <span class="line-number">22</span>
                     <span class="code"><span class="keyword">await</span> <span class="function">confirmAttendance</span><span class="punctuation">(</span><span class="punctuation">)</span><span class="punctuation">;</span> <span class="comment">// Жми кнопку ниже <span class="cursor"></span></span></span>
                 </div>
             </div>
@@ -616,28 +676,40 @@
                     <div class="detail-icon"><i class="fas fa-map-marked-alt"></i></div>
                     <div class="detail-text">
                         <h3>Место</h3>
-                        <p class="text-reveal"><span class="original">Секретная локация</span><span class="hidden">Тульская обл., г.о. Тула, д. Дементеево, территория Поле-1, 176</span></p>
+                        <div class="text-reveal-container">
+                            <div class="text-reveal" id="addressReveal">
+                                <div class="original">Секретная локация</div>
+                                <div class="hidden">Тульская обл., г.о. Тула, д. Дементеево, территория Поле-1, 176</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-icon"><i class="fas fa-user-secret"></i></div>
                     <div class="detail-text">
                         <h3>Дресс-код</h3>
-                        <p>Smart Casual<br>+ маска анонимности</p>
+                        <p>Халат и тапочки<br>+ маска анонимности</p>
                     </div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-icon"><i class="fas fa-gift"></i></div>
                     <div class="detail-text">
                         <h3>Подарки</h3>
-                        <p>Только если очень хочется<br>(мечтаю о механической клавиатуре)</p>
+                        <p>Только если очень хочется<br>(например, мне хочется 😅)</p>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon"><i class="fas fa-map-pin"></i></div>
+                    <div class="detail-text">
+                        <h3>Координаты</h3>
+                        <p class="coordinates-blur" id="coordinatesReveal">54.138338, 37.459972</p>
                     </div>
                 </div>
             </div>
         </div>
         
         <div class="cta">
-            <button class="cta-button" id="confirmButton">
+            <button class="cta-button" id="confirmButton" onclick="ym(12345678,'reachGoal','confirm_click')">
                 <span id="buttonText">Подтвердить участие</span>
                 <span id="buttonIcon" style="margin-left: 8px; display: none;"><i class="fas fa-check"></i></span>
             </button>
@@ -651,7 +723,9 @@
         const CONFIG = {
             secretCount: 3, // Количество избранных семей
             realAddress: "Тульская обл., г.о. Тула, д. Дементеево, территория Поле-1, 176",
-            secretAddress: "Секретная локация"
+            secretAddress: "Секретная локация",
+            coordinates: [54.138338, 37.459972], // Обновленные координаты
+            eventDate: "2025-04-05T16:00"
         };
         
         // Список семей с кодами доступа
@@ -663,9 +737,9 @@
         
         // Инициализация
         document.addEventListener('DOMContentLoaded', function() {
-            // Установка количества избранных семей
-            document.getElementById('secretCount').textContent = CONFIG.secretCount;
-            
+            // Отправка события в Яндекс.Метрику
+            ym(12345678, 'hit', window.location.href, { title: 'Secret Invitation Page' });
+
             // Парсим URL параметры
             const urlParams = new URLSearchParams(window.location.search);
             const familyCode = urlParams.get('family') || window.location.hash.substring(1);
@@ -674,9 +748,12 @@
             const familyNameElement = document.getElementById('familyName');
             const codeFamilyNameElement = document.getElementById('codeFamilyName');
             
+            let currentFamily = '***';
+            
             if (familyCode && families[familyCode]) {
-                familyNameElement.textContent = families[familyCode];
-                codeFamilyNameElement.textContent = families[familyCode];
+                currentFamily = families[familyCode];
+                familyNameElement.textContent = currentFamily;
+                codeFamilyNameElement.textContent = currentFamily;
             } else {
                 familyNameElement.textContent = '***';
                 codeFamilyNameElement.textContent = '***';
@@ -686,7 +763,7 @@
             createFloatingElements();
             createParticles();
             animateCursor();
-            setupConfirmation();
+            setupConfirmation(currentFamily);
             
             // Анимация редактора через 1 секунду
             setTimeout(() => {
@@ -743,18 +820,15 @@
         function initMap() {
             const mapContainer = document.getElementById('mapContainer');
             
-            // Координаты для "Тульская обл., г.о. Тула, д. Дементеево, территория Поле-1, 176"
-            const coordinates = [54.101563, 37.625385]; // Примерные координаты
-            
             ymaps.ready(function() {
                 const map = new ymaps.Map(mapContainer, {
-                    center: coordinates,
+                    center: CONFIG.coordinates,
                     zoom: 15,
                     controls: ['zoomControl']
                 });
                 
                 // Добавляем метку
-                const placemark = new ymaps.Placemark(coordinates, {
+                const placemark = new ymaps.Placemark(CONFIG.coordinates, {
                     hintContent: 'Место проведения праздника',
                     balloonContent: CONFIG.realAddress
                 }, {
@@ -772,72 +846,57 @@
             });
         }
         
-        // Эффект рассыпания текста
-        function explodeText(element) {
-            const text = element.textContent;
-            element.innerHTML = '';
-            
-            for (let i = 0; i < text.length; i++) {
-                const char = document.createElement('span');
-                char.textContent = text[i];
-                char.style.display = 'inline-block';
-                char.style.transformOrigin = 'center';
-                
-                // Случайные параметры анимации
-                const angle = Math.random() * 360;
-                const distance = 10 + Math.random() * 40;
-                const x = Math.cos(angle * Math.PI / 180) * distance;
-                const y = Math.sin(angle * Math.PI / 180) * distance;
-                
-                char.style.setProperty('--tx', `${x}px`);
-                char.style.setProperty('--ty', `${y}px`);
-                char.style.setProperty('--r', `${angle}deg`);
-                char.style.animation = `explode ${0.5 + Math.random() * 0.5}s forwards`;
-                
-                element.appendChild(char);
-            }
-        }
-        
         // Раскрытие секретного адреса
         function revealSecretAddress() {
             const textReveals = document.querySelectorAll('.text-reveal');
             
-            textReveals.forEach(reveal => {
-                const original = reveal.querySelector('.original');
+            textReveals.forEach((reveal) => {
+                // Добавляем класс для активации анимации
+                reveal.classList.add('revealed');
+                
+                // Предварительно вычисляем высоту
                 const hidden = reveal.querySelector('.hidden');
+                const container = reveal.closest('.text-reveal-container');
                 
-                // Анимация рассыпания оригинального текста
-                explodeText(original);
+                // Временно показываем скрытый текст для вычисления высоты
+                hidden.style.visibility = 'hidden';
+                hidden.style.display = 'block';
+                const hiddenHeight = hidden.offsetHeight;
+                hidden.style.display = '';
+                hidden.style.visibility = '';
                 
-                // Показываем скрытый текст с анимацией
-                setTimeout(() => {
-                    hidden.style.clipPath = 'polygon(0 0, 100% 0, 100% 100%, 0 100%)';
-                    hidden.style.transition = 'clip-path 1s ease-out';
+                // Устанавливаем минимальную высоту контейнера
+                if (container) {
+                    container.style.minHeight = `${hiddenHeight + 10}px`;
+                }
+                
+                // Анимация появления символов
+                const chars = hidden.textContent.split('');
+                hidden.innerHTML = '';
+                
+                chars.forEach((char, charIndex) => {
+                    const span = document.createElement('span');
+                    span.textContent = char;
+                    hidden.appendChild(span);
                     
-                    // Анимация появления символов по одному
-                    const chars = hidden.textContent.split('');
-                    hidden.innerHTML = '';
-                    
-                    chars.forEach((char, index) => {
-                        const span = document.createElement('span');
-                        span.textContent = char;
-                        span.style.opacity = '0';
-                        span.style.display = 'inline-block';
-                        span.style.transform = 'translateY(10px)';
-                        hidden.appendChild(span);
-                        
-                        setTimeout(() => {
-                            span.style.opacity = '1';
-                            span.style.transform = 'translateY(0)';
-                            span.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                        }, index * 50);
-                    });
-                }, 500);
+                    setTimeout(() => {
+                        span.style.opacity = '1';
+                        span.style.transform = 'translateY(0)';
+                    }, 50 * charIndex);
+                });
             });
+
+            // Убираем размытие с координат
+            const coordinates = document.getElementById('coordinatesReveal');
+            if (coordinates) {
+                setTimeout(() => {
+                    coordinates.classList.add('revealed');
+                }, 500);
+            }
         }
         
         // Обработка подтверждения
-        function setupConfirmation() {
+        function setupConfirmation(familyName) {
             const button = document.getElementById('confirmButton');
             const buttonText = document.getElementById('buttonText');
             const buttonIcon = document.getElementById('buttonIcon');
